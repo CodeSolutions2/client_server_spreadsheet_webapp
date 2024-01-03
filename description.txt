@@ -52,6 +52,9 @@ function run_webapp() {
 Should contain a spreadsheet on the application.
 
 
+// ------------------------------------------
+// Code.gs
+// ------------------------------------------
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('App functionality')
@@ -129,3 +132,199 @@ function put_Spreadsheet_values_name0(out) {
 }
 
 // ------------------------------------------
+
+
+
+// ------------------------------------------
+// index.html
+// ------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <h1 style='text-align: center; margin-bottom: -35px;'>Client-Server spreadsheet code</h1>
+    <br><br>
+    <p style='text-align: center; margin-bottom: -35px;'>This is a JavaScript/Google Script and HTML framework for how to create a Server-side and Client-side web application. The Server-side is integrated to the google spreadsheet using google apps scripts commands, thus spreadsheet variables can be transfered to and from the deployed browser webapp. However, a client-side user may not be familiar with deploying google apps scripts to load spreadsheet variables to the browser supported web interface. Thus, at a basic level the client-side spreadsheet, for user distribution, lauches a pop-up to the server webapp and a spreadsheet-like interface is available for the user to use with their client-side spreadsheet.</p>
+
+    <br><br>
+
+    <!-- Could try to make a real spreadsheet -->
+    <div align="center">
+    <table style='text-align: center; width: 600px;'>
+      <tr>
+        <td>MODEL_API_KEY</td>
+        <td>prompt</td>
+        <td>model response</td>
+      </tr>
+
+      <tr>
+        <td><input id="cell0" type="text" value="" placeholder="Cell 0" rows="10" cols="100" style='display:block; text-align: left; width: 150px;'></td>
+
+        <td><input id="cell1_input" type="text" value="" placeholder="Cell 1" rows="10" cols="100" style='display:block; text-align: left; width: 150px;'><p id="cell1_output" style="display:none; text-align: left;"></p></td>
+
+        <td><p id="cell2" style="display:block; text-align: left;"></p></td>
+      </tr>
+    </table>
+    </div>
+
+    <br><br>
+
+    <div style="width:100%;height:100%;position:absolute;vertical-align:middle;text-align:center;">
+      <button id="fill_a_row" onclick="fill_a_row()">Run a spreadsheet selection</button>
+    <div>
+
+    <br><br>
+
+    <p id="error_message" style='text-align: center; margin-bottom: -35px; display:none;'>An error occured retreiving results from the AI model. Please close the popups and try running the app again.</p>
+
+<!-- --------------------------------------------------- -->
+
+<!-- CSS -->
+<style>
+  table {
+    border-collapse: collapse;
+  }
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px 20px;
+  }
+</style>
+
+<!-- --------------------------------------------------- -->
+
+<script>
+  // ********************************************************
+  // Runs immediately 
+  // ********************************************************
+
+  // Server-side output
+  function_name0_server();
+
+  // ********************************************************
+
+
+  // ********************************************************
+
+  function fill_a_row() {
+    
+    // Client-side output
+    function_name0_client();
+
+    document.getElementById("fill_a_row").style.display = "none";
+  }
+
+  // ********************************************************
+
+  async function function_name0_server(){
+
+    // -------------------------------------
+    // Get values from the spreadsheet : ONLY WORKS FOR THE SERVER
+    // Saving SpreadSheet values to localStorage
+    // -------------------------------------
+    google.script.run.withSuccessHandler(function(result){ 
+      localStorage.setItem('MODEL_API_KEY', result.MODEL_API_KEY);  
+      localStorage.setItem('prompt', result.prompt);
+      }).get_Spreadsheet_values();
+
+    // -------------------------------------
+    // Call the API
+    // -------------------------------------
+    // Get values from localStorage
+    var MODEL_API_KEY = localStorage.getItem('MODEL_API_KEY');
+    var prompt = localStorage.getItem('prompt');
+
+    // ------------------------------------------
+
+    var temperature = 0;
+    var model_name = 'gpt-3.5-turbo';
+
+    // ------------------------------------------
+
+    var system_content = "You are a helpful assistant";
+    var assistant_content = "Respond concisely";
+    var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+    var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+    var url = 'https://api.openai.com/v1/chat/completions';
+    var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + MODEL_API_KEY};
+    var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+    // ------------------------------------------
+
+    try {
+      // -------------------------------------
+      // Put the values from the API to the spreadsheet
+      // -------------------------------------
+      const text_out = await fetch(url, options).then(res => res.json()).then(res => {
+        var out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content']; 
+        google.script.run.withSuccessHandler(function(result){ }).put_Spreadsheet_values_name0(out);
+        document.getElementById("cell1_input").style.display = "none";
+        document.getElementById("cell1_output").style.display = "block";
+        document.getElementById('cell1_output').innerHTML = prompt;
+        document.getElementById('cell2').innerHTML = out;
+      return JSON.stringify(res)})
+    } 
+    catch (error) 
+    {
+      document.getElementById("error_message").style.display = "block";
+    }
+    
+  } // end of async function function_name0_server()
+
+
+  // ********************************************************
+
+
+  async function function_name0_client(){
+
+    // MODEL_API_KEY
+    var MODEL_API_KEY = document.getElementById('cell0').value;
+
+    // prompt
+    var prompt = document.getElementById('cell1_input').value;
+
+    // ------------------------------------------
+
+    var temperature = 0;
+    var model_name = 'gpt-3.5-turbo';
+
+    // ------------------------------------------
+
+    var system_content = "You are a helpful assistant";
+    var assistant_content = "Respond concisely";
+    var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+    var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+    var url = 'https://api.openai.com/v1/chat/completions';
+    var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + MODEL_API_KEY};
+    var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+    // ------------------------------------------
+
+    try {
+      // -------------------------------------
+      // Put the values from the API to the spreadsheet
+      // -------------------------------------
+      const text_out = await fetch(url, options).then(res => res.json()).then(res => {
+        var out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+        document.getElementById("cell1_input").style.display = "none";
+        document.getElementById("cell1_output").style.display = "block";
+        document.getElementById('cell1_output').innerHTML = prompt;
+        document.getElementById('cell2').innerHTML = out;
+      return JSON.stringify(res)})
+    } 
+    catch (error) 
+    {
+      document.getElementById("error_message").style.display = "block";
+    }
+
+    
+  } // end of async function function_name0_client()
+
+
+</script>
+
+  </body>
+</html>
