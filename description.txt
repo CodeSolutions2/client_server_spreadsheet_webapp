@@ -1,0 +1,131 @@
+
+// ------------------------------------------
+// Client
+// ------------------------------------------
+Should launch the UI widow to the server
+
+
+// ------------------------------------------
+// Code.gs
+// ------------------------------------------
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('App functionality')
+      .addItem('Run app', 'run_webapp')
+      .addToUi();
+}
+
+// ------------------------------------------
+
+function run_webapp() {
+
+  // --------------------------------------------
+  // Open the window to the server
+  // --------------------------------------------
+  var js2html_data = "SERVER_URL";
+
+  var html_texte = '<html><head></head><body><script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>'
+ + '<script>function ouvrir_fenetre() { winRef = window.open("'+js2html_data+'", "winRef", target="width=1600,height=900"); }</script>'
++ '<button onclick="ouvrir_fenetre(); ">[1] Run spreadsheet selection</button>'
++ '<br><br>'
+ + '<button onclick="closeWin();">[2] Close the popups</button>'
+ + '<script>function closeWin() { if (winRef) {  winRef.close(); google.script.host.close();}; }</script>'
+  + '</body></html>';
+
+  var html_objet = HtmlService.createHtmlOutput(html_texte);
+  html_objet.js2html_data = js2html_data;
+
+  SpreadsheetApp.getUi().showModalDialog(html_objet, 'PopUp');
+
+  // --------------------------------------------
+
+}
+
+
+
+
+
+
+// ------------------------------------------
+// Server
+// ------------------------------------------
+Should contain a spreadsheet on the application.
+
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('App functionality')
+      .addItem('Run app', 'run_webapp')
+      .addToUi();
+}
+
+// ------------------------------------------
+
+function run_webapp() {
+  
+  var js2html_data = "https://script.google.com/macros/s/AKfycbwNKP5mHepLYD764eZ83PRsnG7kZ7kblgVPgXzgnKwE3GXkB6Zb7OJ50t7TBTv4jCLtUQ/exec";
+
+  var html_texte = '<html><head></head><body><script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>'
+ + '<script>function ouvrir_fenetre() { winRef = window.open("'+js2html_data+'", "winRef", target="width=500,height=500"); }</script>'
++ '<button onclick="ouvrir_fenetre(); ">[1] Run spreadsheet selection</button>'
++ '<br><br>'
+ + '<button onclick="closeWin();">[3] Close the popups</button>'
+ + '<script>function closeWin() { if (winRef) {  winRef.close(); google.script.host.close();}; }</script>'
+  + '</body></html>';
+
+  var html_objet = HtmlService.createHtmlOutput(html_texte);
+  html_objet.js2html_data = js2html_data;
+
+  SpreadsheetApp.getUi().showModalDialog(html_objet, 'PopUp');
+}
+
+// ------------------------------------------
+
+function doGet() {
+    return HtmlService.createHtmlOutputFromFile('index');
+}
+
+// ------------------------------------------
+
+function get_Spreadsheet_values() {
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var dictt = {};
+
+  // Read the key
+  dictt.MODEL_API_KEY = sheet.getRange("A2").getValues();
+
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+
+  // Get spreadsheet input: prompt 
+  var cell_letter = "B"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+  dictt.response = sheet.getRange(str_val).getValues();
+
+  return dictt;
+}
+
+// ------------------------------------------
+
+function put_Spreadsheet_values_name0(out) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  // --------------------------------------------
+  // Manual row selection of sheet
+  // --------------------------------------------
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+
+  // model response
+  var cell_letter = "C"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [out] ]);
+}
+
+// ------------------------------------------
