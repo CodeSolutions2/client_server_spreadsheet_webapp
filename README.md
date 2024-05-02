@@ -1,5 +1,7 @@
-# spreadsheet_webapp_client_server
+# client_server_spreadsheet_webapp
 
-Client: Should launch the UI widow to the server
+This is a JavaScript/Google Apps Script and HTML framework for how to create a Server-side and Client-side web application. The Server-side is integrated to the google spreadsheet using google apps scripts commands, thus spreadsheet variables can be transferred to and from the deployed browser webapp. However, a client-side user may not be familiar with deploying google apps scripts to load spreadsheet variables to the browser supported web interface. Thus, at a basic level the client-side spreadsheet, for user distribution, launches a pop-up to the server webapp and a spreadsheet-like interface is available for the user to use with their client-side spreadsheet. A tensorflow.js model structure can be included in the code, if the client requests.
 
-Server: Should contain a spreadsheet on the application.
+In summary, the Client google apps script file should launch the UI widow to the server, and the Server google apps script file should contain a spreadsheet/dynamic table written in JavaScript. The user/client can copy-paste information from their client-side spreadsheet, into the server spreadsheet (ie: the server spreadsheet could be programmed to run a model API that transforms user data); the user/client can then copy-paste their transformed information back to their client-side spreadsheet.
+
+[Available for purchase on Upwork](https://www.upwork.com/services/product/development-it-client-server-spreadsheet-google-apps-script-code-1740063136644558848)
